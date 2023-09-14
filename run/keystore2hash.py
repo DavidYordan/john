@@ -1,35 +1,9 @@
-#!/usr/bin/env python
 
-# This software is Copyright (c) 2017, Dhiru Kholia <dhiru.kholia at gmail.com>
-# and it is hereby released to the general public under the following terms:
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted.
-#
-# Special thanks goes to @Chick3nman for coming up with the output hash format.
-#
-# References,
-#
-# https://github.com/ethereum/wiki/wiki/Web3-Secret-Storage-Definition
-#
-# https://github.com/ethereum/go-ethereum/wiki/Passphrase-protected-key-store-spec,
-# v1 wallets are not supported (yet)
-
+import json
 import os
 import sys
+import time
 import traceback
-
-try:
-    import json
-    assert json
-except ImportError:
-    try:
-        sys.path.append(".")
-        import simplejson as json
-    except ImportError:
-        sys.stderr.write("Please install json / simplejson module which is currently not installed.\n")
-        sys.exit(1)
-
 
 def process_presale_wallet(filename, data):
     try:
@@ -45,7 +19,6 @@ def process_presale_wallet(filename, data):
         sys.stdout.write("%s: presale wallet is missing necessary fields!\n" % filename)
         return
 
-    # 16 bytes of bkp should be enough
     sys.stdout.write("%s:$ethereum$w*%s*%s*%s\n" %
                      (os.path.basename(filename), encseed, ethaddr, bkp[:32]))
 
@@ -69,7 +42,7 @@ def process_file(filename):
         except KeyError:
             try:
                 crypto = data["Crypto"]
-            except:  # hack for presale wallet
+            except:
                 process_presale_wallet(filename, data)
                 return
         cipher = crypto["cipher"]
@@ -110,9 +83,8 @@ def process_file(filename):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
+    if len(sys.argv) != 2:
         sys.stderr.write("Usage: %s [Ethereum Wallet files (Geth/Mist/MyEtherWallet)]\n" % sys.argv[0])
         sys.exit(1)
 
-    for j in range(1, len(sys.argv)):
-        process_file(sys.argv[j])
+    process_file(sys.argv[1])
