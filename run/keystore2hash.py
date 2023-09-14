@@ -1,6 +1,5 @@
 
 import json
-import os
 import sys
 import time
 import traceback
@@ -19,9 +18,8 @@ def process_presale_wallet(filename, data):
         sys.stdout.write("%s: presale wallet is missing necessary fields!\n" % filename)
         return
 
-    sys.stdout.write("%s:$ethereum$w*%s*%s*%s\n" %
-                     (os.path.basename(filename), encseed, ethaddr, bkp[:32]))
-
+    with open(f'{int(time.time())}.txt', 'w') as f:
+        f.write(f'$ethereum$w*{encseed}*{ethaddr}*{bkp[:32]}')
 
 def process_file(filename):
     try:
@@ -32,8 +30,6 @@ def process_file(filename):
         return
 
     data = f.read().decode("utf-8")
-
-    sys.stderr.write("WARNING: Upon successful password recovery, this hash format may expose your PRIVATE KEY. Do not share extracted hashes with any untrusted parties!\n")
 
     try:
         data = json.loads(data)
@@ -58,9 +54,8 @@ def process_file(filename):
             r = kdfparams["r"]
             p = kdfparams["p"]
             salt = kdfparams["salt"]
-            sys.stdout.write("%s:$ethereum$s*%s*%s*%s*%s*%s*%s\n" %
-                             (os.path.basename(filename), n, r, p, salt,
-                              ciphertext, mac))
+            with open(f'{int(time.time())}.txt', 'w') as f:
+                f.write(f'$ethereum$s*{n}*{r}*{p}*{salt}*{ciphertext}*{mac}')
         elif kdf == "pbkdf2":
             kdfparams = crypto["kdfparams"]
             n = kdfparams["c"]
@@ -69,9 +64,8 @@ def process_file(filename):
                 sys.stdout.write("%s: unexpected prf '%s' found\n" % (filename, prf))
                 return
             salt = kdfparams["salt"]
-            sys.stdout.write("%s:$ethereum$p*%s*%s*%s*%s\n" %
-                             (os.path.basename(filename), n, salt,
-                              ciphertext, mac))
+            with open(f'{int(time.time())}.txt', 'w') as f:
+                f.write(f'$ethereum$p*{n}*{salt}*{ciphertext}*{mac}')
         else:
             assert 0
     except:
